@@ -24,6 +24,11 @@ export class Form extends Component {
     const { title, email, content } = this.state;
     const article = { title, email, content };
     this.props.addArticle(article);
+    this.setState({
+      title: "",
+      email: "",
+      content: ""
+    });
   };
 
   render() {

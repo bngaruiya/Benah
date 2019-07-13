@@ -1,24 +1,27 @@
 import axios from "axios";
-import { GET_ARTICLES, DELETE_ARTICLE, ADD_ARTICLE, GET_ERRORS } from "./types";
-import { createMessage } from "./messages";
+import { GET_ARTICLES, DELETE_ARTICLE, ADD_ARTICLE } from "./types";
+import { createMessage, returnErrors } from "./messages";
+import { tokenConfig } from "./auth";
 
 //GET ARTICLES
-export const getArticles = () => dispatch => {
+export const getArticles = () => (dispatch, getState) => {
   axios
-    .get("/api/blog/")
+    .get("/api/blog/", tokenConfig(getState))
     .then(res => {
       dispatch({
         type: GET_ARTICLES,
         payload: res.data
       });
     })
-    .catch(err => console.log(err));
+    .catch(err =>
+      dispatch(returnErrors(err.response.data, err.response.status))
+    );
 };
 
 //DELETE ARTICLE
-export const deleteArticle = id => dispatch => {
+export const deleteArticle = id => (dispatch, getState) => {
   axios
-    .delete(`/api/blog/${id}/`)
+    .delete(`/api/blog/${id}/`, tokenConfig(getState))
     .then(res => {
       dispatch(createMessage({ deleteArticle: "Article Deleted" }));
       dispatch({
@@ -30,9 +33,9 @@ export const deleteArticle = id => dispatch => {
 };
 
 //ADD ARTICLE
-export const addArticle = article => dispatch => {
+export const addArticle = article => (dispatch, getState) => {
   axios
-    .post("/api/blog/", article)
+    .post("/api/blog/", article, tokenConfig(getState))
     .then(res => {
       dispatch(createMessage({ addArticle: "Article Added" }));
       dispatch({
@@ -40,14 +43,7 @@ export const addArticle = article => dispatch => {
         payload: res.data
       });
     })
-    .catch(err => {
-      const errors = {
-        msg: err.response.data,
-        status: err.response.status
-      };
-      dispatch({
-        type: GET_ERRORS,
-        payload: errors
-      });
-    });
+    .catch(err =>
+      dispatch(returnErrors(err.response.data, err.response.status))
+    );
 };
